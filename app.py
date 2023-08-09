@@ -2,6 +2,7 @@
 from flask import Flask, request, jsonify, make_response
 from flask_sqlalchemy import SQLAlchemy
 from os import environ
+from producer import SendMsg
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('DB_URL')
@@ -37,9 +38,12 @@ def create_user():
                                 city=data['city'], salary=data['salary'])
         db.session.add(new_employee)
         db.session.commit()
+        SendMsg('new employee created: ' + data['name'] + ' in ' + 
+                data['country'] + ' city: ' + data['city'] + ' salary: ' + 
+                str(data['salary']) + ' $')
         return make_response(jsonify({'message': 'Employee created successfully'}), 201)
     except e:
-        return make_response(jsonify({'message': 'error creating employee'}), 500)
+        return make_response(jsonify({'message': f"error creating employee {e}"}), 500)
 
 @app.route('/employees', methods=['GET'])
 def get_employees():
